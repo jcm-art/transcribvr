@@ -1,5 +1,6 @@
 # Fetch ubuntu 18.04 LTS docker image
 FROM ubuntu:18.04
+SHELL ["/bin/bash", "-c"] 
 
 #build command: docker run -it --mount type=bind,src="$(pwd)",target=/src/app/ ubuntu /bin/bash
 
@@ -58,16 +59,21 @@ RUN \
 RUN \ 
   pip3 install pandas
 
+RUN \ 
+  pip3 install pydub
+
+RUN \
+  apt-get install -y ffmpeg
+
 RUN \
   pip install -U torch torchaudio --no-cache-dir
-
-#RUN \
-#  source ~/.bashrc
-
-SHELL ["/bin/bash", "-c"] 
 
 RUN \
   export LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libgomp.so.1
 
 #COPY requirements.txt requirements.txt
 #RUN pip3 install -r requirements.txt
+
+#Error - Currently must run the following to get docker working:
+#  source ~/.bashrc
+#   export LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libgomp.so.1
