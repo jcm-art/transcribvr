@@ -2,7 +2,7 @@
 FROM ubuntu:18.04
 SHELL ["/bin/bash", "-c"] 
 
-#build command: docker run -it --mount type=bind,src="$(pwd)",target=/src/app/ ubuntu /bin/bash
+#build command: docker run -it --mount type=bind,src="$(pwd)",target=/src/transcribvr/ ubuntu /bin/bash
 
 ENV DEBIAN_FRONTEND=noninteractive 
 #COPY Transcribvr.py /etc/app/Transcribvr.py
