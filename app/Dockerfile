@@ -3,6 +3,7 @@ FROM ubuntu:18.04
 SHELL ["/bin/bash", "-c"] 
 
 #build command: docker run -it --mount type=bind,src="$(pwd)",target=/src/transcribvr/ ubuntu /bin/bash
+#TODO: REBUILD DOCKER FILE AND UPDATE FILE STRUCTURE TO REMOVE APP
 
 ENV DEBIAN_FRONTEND=noninteractive 
 #COPY Transcribvr.py /etc/app/Transcribvr.py
