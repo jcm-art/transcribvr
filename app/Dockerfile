@@ -63,6 +63,9 @@ RUN \
 RUN \ 
   pip3 install pydub
 
+RUN \ 
+  pip3 install pytest
+
 RUN \
   apt-get install -y ffmpeg
 

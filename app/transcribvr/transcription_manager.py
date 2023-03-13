@@ -1,42 +1,86 @@
-
-
-INPUT_FILEPATH: str=".\\audio_input\\"
-job_id=0
+from transcribvr.audio_data_manager import AudioDataManager
+from transcribvr.audio_transcriber import AudioTranscriber
+from transcribvr.output_manager import OutputManager
 
 class TranscriptionManager:
-    
+    INPUT_FILEPATH = "./audio_input/"
+    job_id=0
+    job_list=[]
+    job_packages = {}
+
     def __init__(self):
         self.__log_entry("Initializing TranscriptionManager")
-        #self.audioLoader = AudioLoader()
-        #self.audioTranscriber = AudioTranscriber()
+        self.session_id=self.__define_session_id()
+        self.audioLoader = AudioDataManager()
+        self.audioTranscriber = AudioTranscriber()
+        self.outputManager = OutputManager()
 
-    def assign_transcription(self,audio_file_path: str) -> bool:
+        self.__log_entry("Session %s ready for transcription task" % self.session_id)
+
+
+    def check_if_ready_for_transcription(self):
+        if self.audioLoader and self.audioTranscriber and self.outputManager:
+            return True
+        else:
+            return False
+
+    def assign_transcription(self,audio_file_path: str) -> str:
         self.__log_entry("Assign transcription task")
-        return False
+        current_job_id = self.__generate_job_id()
+        self.job_list.append(current_job_id)
+        self.job_packages[current_job_id]= audio_file_path
 
-    def __generate_job_id(self) -> bool:
-        self.__log_entry("Generate job id")
-        return False
+        self.__log_entry("Prepare audio files for " + current_job_id)
+        self.job_packages[current_job_id] = self.__prepare_audio(self.job_packages[current_job_id], current_job_id)
 
-    def __prepare_audio(self) -> bool:
-        self.__log_entry("Prepare audio for job")
-        return False
+        self.__log_entry("Current dictionary: \n " + str(self.job_packages))
+
+        self.job_packages[current_job_id] = self.__transcribe_audio(self.job_packages[current_job_id],current_job_id)
+
+        self.__log_entry("Current dictionary: \n " + str(self.job_packages))
+
+        output_text = self.__generate_output(current_job_id)
+
+        self.__log_entry("Final Output Text: \n " + output_text)
+
+        return ""
     
-    def __transcribe_audio(self) -> bool:
-        self.__log_entry("Transcribe audio for job")
-        return False
+    def get_buffer_filepath(self):
+        return self.INPUT_FILEPATH
+
+    def __prepare_audio(self, audio_files: str, job_id: str) -> dict:
+        self.__log_entry("Prepare audio for job id %s " % job_id)
+        processed_files = self.audioLoader.process_audio_files(audio_files, job_id)
+        self.__log_entry("Processed files returned: \n" + str(processed_files))
+        return processed_files
     
-    def __generate_output(self) -> bool:
+    def __transcribe_audio(self, transcription_package: dict, current_job_id: str) -> dict:
+        transcription_output = self.audioTranscriber.transcribe_audio_in_buffer(transcription_package, current_job_id)
+        self.__log_entry("Transcribed audio for job %s to output: " % current_job_id)
+        self.__log_entry(str(transcription_output))
+        
+        return transcription_output
+    
+    def __generate_output(self, current_job_id) -> bool:
         self.__log_entry("Generate transcription output")
-        return False
+        output_text = self.outputManager.generate_ouput_text(self.job_packages[current_job_id], current_job_id)
+        return output_text
     
     def __dispatch_output(self) -> bool:
         self.__log_entry("Dispatch transcription output")
         return False
+    
+    def __define_session_id(self) -> int:
+        self.__log_entry("Generate session id")
+        session_id = 0
+        return session_id
+    
+    def __generate_job_id(self) -> str:
+        current_job_id = "s" + str(self.session_id) + "j" + str(self.job_id)
+        self.job_id+=1
 
-    def __define_session_id(self) -> bool:
-        self.__log_entry("Define session ID")
-        return False
+        self.__log_entry("Generated job id: %s" % current_job_id)
+        return current_job_id
 
     def __log_entry(self, entry: str):
         print(entry)
