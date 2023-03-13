@@ -5,7 +5,6 @@ from transcribvr.output_manager import OutputManager
 class TranscriptionManager:
     INPUT_FILEPATH = "./audio_input/"
     job_id=0
-    job_list=[]
     job_packages = {}
 
     def __init__(self):
@@ -27,21 +26,23 @@ class TranscriptionManager:
     def assign_transcription(self,audio_file_path: str) -> str:
         self.__log_entry("Assign transcription task")
         current_job_id = self.__generate_job_id()
-        self.job_list.append(current_job_id)
         self.job_packages[current_job_id]= audio_file_path
 
         self.__log_entry("Prepare audio files for " + current_job_id)
+
+        self.__log_entry("Dictionary (to data manager): \n " + str(self.job_packages[current_job_id]))
+
         self.job_packages[current_job_id] = self.__prepare_audio(self.job_packages[current_job_id], current_job_id)
 
-        self.__log_entry("Current dictionary: \n " + str(self.job_packages))
+        self.__log_entry("Dictionary (from data manager): \n " + str(self.job_packages))
 
         self.job_packages[current_job_id] = self.__transcribe_audio(self.job_packages[current_job_id],current_job_id)
 
-        self.__log_entry("Current dictionary: \n " + str(self.job_packages))
+        self.__log_entry("Dictionary (from transcriber): \n " + str(self.job_packages))
 
         output_text = self.__generate_output(current_job_id)
 
-        self.__log_entry("Final Output Text: \n " + output_text)
+        self.__log_entry("Final Output Text: \n " + output_text + " finished.")
 
         return ""
     

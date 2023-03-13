@@ -16,7 +16,7 @@ class OutputManager:
             self.__log_entry("Generating output for " + str(transcription_dict[transcript]))
             output_text+="Transcription for file " + transcript + "\n\n"
             output_text+="Metadata: " + str(transcription_dict[transcript]["metadata"])+ "\n\n"
-            output_text+="Transcript: " + str(transcription_dict[transcript]["transcription"])+ "\n\n"
+            output_text+="Transcript: " + str(transcription_dict[transcript]["transcription"])+ "\n"
 
         assert(self.__save_output_file(output_text, current_job_id))
         return output_text

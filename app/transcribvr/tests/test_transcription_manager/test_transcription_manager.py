@@ -21,4 +21,11 @@ def test_single_m4a_audio_file():
     adm = TranscriptionManager()
     adm.assign_transcription(test_file_path)
 
+def test_single_mp3_audio_file():
+    test_file = "audio.mp3"
+    test_file_path = os.path.abspath("tests/resources/"+test_file)
+
+    adm = TranscriptionManager()
+    adm.assign_transcription(test_file_path)
+
 
