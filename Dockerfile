@@ -6,7 +6,10 @@ SHELL ["/bin/bash", "-c"]
 # docker build --no-cache -t transcbvr-ubuntu18.04 .
 
 # Build commands (to update docker build): 
-# docker build -t transcbvr-ubuntu18.04 .
+# For M2 Mac: 
+#   docker build -t transcbvr-ubuntu18.04 .
+# For circle CI: 
+#   docker build --platform linux/amd64 -t transcbvr-ubuntu18.04-amd . 
 
 # Run command:
 # docker run -it --mount type=bind,src="$(pwd)",target=/src/transcribvr/ transcbvr-ubuntu18.04 bash
@@ -38,6 +41,9 @@ RUN \
 RUN \
   export LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libgomp.so.1
 
+
+# COPY .transcbvr /src/transcribvr/
+# Attempt to avoid copy, run though config.yml
 
 #To get updated requirements from pip3: pip3 freeze > requirements.txt
 
