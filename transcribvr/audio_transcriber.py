@@ -9,52 +9,8 @@ import torchaudio
 class AudioTranscriber:
     """
     A class that transcribes audio files using a pre-trained model.
-
-    Attributes:
-        DEVICE (str): The device in use for processing the audio. Default is an empty 
-            string, which will be defined later.
-        INPUT_FILEPATH (str): The path where the audio input files are located.
-        LANGUAGE_DEFAULT (str): The default language to use for the standard performance 
-            model.
-        transcription_dict (dict): A dictionary to store the transcriptions.
-
-    Methods:
-        __init__(high_perf=False):
-            Initializes the AudioTranscriber object with either high performance or 
-            standard performance depending on the input argument.
-
-        transcribe_audio_in_buffer(audio_buffer: dict, job_id: str) -> dict:
-            Transcribes audio data from a given audio buffer and job ID.
-
-        __parse_audio_dict(audio_buffer: dict, job_id: str) -> bool:
-            Parses the audio dictionary from the audio buffer and stores the results in 
-            the transcription dictionary.
-
-        __define_device():
-            Defines the device used for processing audio.
-
-        __load_model() -> bool:
-            Loads the pre-trained model for transcription.
-
-        __load_audio(audio_file: str):
-            Loads the audio file from the given file path and converts it into a format 
-            compatible with the model.
-
-        __make_log_mel_spectrogram(audio):
-            Computes the log mel spectrogram for the audio file.
-
-        __detect_language(mel_audio) -> str:
-            Detects the language of the audio based on the mel spectrogram.
-
-        __decode_audio(mel_audio):
-            Decodes the audio to obtain the text transcription.
-
-        __get_output_text(result) -> str:
-            Gets the output text from the transcription result.
-
-        __log_entry(entry: str):
-            Logs an entry to track the progress of the transcription.
     """
+    
     DEVICE = ""
     INPUT_FILEPATH = "./audio_input/"
     LANGUAGE_DEFAULT = "N/A for standard performance model"

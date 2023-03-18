@@ -8,6 +8,7 @@ class TranscriptionManager:
     the audio to MP3 format, generates a transcription of the audio via a transcription 
     class, formats the output via an output manager, and dispatches the output to the client.
     """
+    
     INPUT_FILEPATH = "./audio_input/"
     job_id=0
     job_packages = {}

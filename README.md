@@ -61,6 +61,16 @@ Checks if the best practices and the right coding style has been used.
 
     Give an example
 
+### Documentation
+
+To generate .rst files for updating documentation, run the following in the top level directiory:
+
+    sphinx-apidoc -o docs transcribvr/
+
+To generate html files for updating documentation, run the following in the docs folder:
+
+    make clean html
+
 ## Deployment
 
 Add additional notes to deploy this on a live system

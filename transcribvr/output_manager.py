@@ -3,24 +3,7 @@ import os
 
 class OutputManager:
     """
-    Attributes:
-        OUTPUT_FILEPATH (str): The default path where the output files are saved.
-
-    Methods:
-        __init__():
-            Initializes the OutputManager object.
-
-        generate_output_text(transcription_dict: dict, current_job_id: str) -> str:
-            Generates the output text for a given transcription dictionary and job ID.
-
-        set_custom_filepath(custom_output_filepath) -> bool:
-            Sets a custom file path for the output file.
-
-        __save_output_file(output_text: str, current_job_id: str)-> bool:
-            Saves the output file with the given output text and job ID.
-
-        __log_entry(entry: str):
-            Logs an entry to track the progress of the output generation.
+    A class to manage formatting the output of transcription tasks
 
     """
     OUTPUT_FILEPATH ="./transcription_output/"
