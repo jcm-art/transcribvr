@@ -46,8 +46,15 @@ jobs:
           name: Testing First Test Step and Viewing Files
           command: |
             uname -a
-            echo "Hello, Arm!"
+            echo "Hello, transcribvr docker!"
             ls -al
+      - run:
+          name: Test execution
+          command: |
+            cd transcribvr
+            ls -al
+            python3 -m pytest tests
+            echo "Tests complete!"
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
