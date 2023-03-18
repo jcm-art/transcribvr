@@ -11,7 +11,7 @@ jobs:
     resource_class: arm.medium
     steps:
       - checkout #adds files to circle CI
-      - hello_test:
+      - hello:
           name: Testing First Step and Viewing Files
           command: |
             uname -a
