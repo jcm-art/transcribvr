@@ -21,8 +21,7 @@ jobs:
           name: Running Tests
           command: |
             echo "TBD tests"
-      - run:
-
+            
       - setup_remote_docker 
        
       - run:
