@@ -9,30 +9,30 @@ jobs:
     machine:
         image: ubuntu-2204:2022.04.2
     resource_class: arm.medium
-      steps:
-        - checkout #adds files to circle CI
-        # start proprietary DB using private Docker image
-        # with credentials stored in the UI
-        - run:
-          name: Testing First Step and Viewing Files
+    steps:
+      - checkout #adds files to circle CI
+      # start proprietary DB using private Docker image
+      # with credentials stored in the UI
+      - run:
+        name: Testing First Step and Viewing Files
+        command: |
+          uname -a
+          echo "Hello, Arm!"
+          ls -al
+      - run:
+          name: Running Tests
           command: |
-            uname -a
-            echo "Hello, Arm!"
-            ls -al
-        - run:
-            name: Running Tests
-            command: |
-              echo "TBD tests"
+            echo "TBD tests"
 
-        - run: |
-            echo "$DOCKERHUB_PASSWORD" | docker login --username $DOCKER_HUB_USER_ID --password-stdin
-            docker run -d --name db company/proprietary-db:1.2.3
+      - run: |
+          echo "$DOCKERHUB_PASSWORD" | docker login --username $DOCKER_HUB_USER_ID --password-stdin
+          docker run -d --name db company/proprietary-db:1.2.3
 
-        # build the application image
-        - run: docker build -t jcmart/transcribvr-ubuntu-18-04-amd-circleci:0.1 .
+      # build the application image
+      - run: docker build -t jcmart/transcribvr-ubuntu-18-04-amd-circleci:0.1 .
 
-        # deploy the image
-        - run: docker push jcmart/transcribvr-ubuntu-18-04-amd-circleci:0.1
+      # deploy the image
+      - run: docker push jcmart/transcribvr-ubuntu-18-04-amd-circleci:0.1
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
