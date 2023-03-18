@@ -7,8 +7,7 @@ version: 2.1
 jobs:
   docker-build:
     machine:
-        image: ubuntu-2004:current
-    resource_class: arm.medium
+        image: ubuntu-2004:202010-01
     steps:
       - checkout #adds files to circle CI
       # start proprietary DB using private Docker image
