@@ -11,13 +11,13 @@ jobs:
     resource_class: arm.medium
     steps:
       - checkout #adds files to circle CI
-      - hello:
+      - run:
           name: Testing First Step and Viewing Files
           command: |
             uname -a
             echo "Hello, Arm!"
             ls -al
-      - run_tests:
+      - run:
           name: Running Tests
           command: |
             cd transcribvr
