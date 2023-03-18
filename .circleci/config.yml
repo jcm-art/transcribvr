@@ -26,7 +26,7 @@ jobs:
 
       - run: |
           echo "$DOCKER_HUB_PASSWORD" | docker login --username $DOCKER_HUB_USER_ID --password-stdin
-          docker run -d --name db company/proprietary-db:1.2.3
+      # docker run -d --name db company/proprietary-db:1.2.3
 
       # build the application image
       - run: docker build -t jcmart/transcribvr-ubuntu-18-04-amd-circleci:0.1 .
