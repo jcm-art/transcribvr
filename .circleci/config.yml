@@ -35,7 +35,7 @@ jobs:
 
   docker-test:
     docker:
-      - image: jcmart/transcribvr-ubuntu-18-04-amd-circleci:latest
+      - image: jcmart/transcribvr-ubuntu-18-04-amd-circleci:0.1
         auth:
           username: $DOCKER_HUB_USER_ID
           password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
