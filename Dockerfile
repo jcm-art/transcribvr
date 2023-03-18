@@ -9,7 +9,7 @@ SHELL ["/bin/bash", "-c"]
 # For M2 Mac: 
 #   docker build -t transcbvr-ubuntu18.04 .
 # For circle CI: 
-#   docker build --platform linux/amd64 -t transcbvr-ubuntu18.04-amd . 
+#   Images built using the circle CI pipeline, imformation in config.yml
 
 # Run command:
 # docker run -it --mount type=bind,src="$(pwd)",target=/src/transcribvr/ transcbvr-ubuntu18.04 bash
