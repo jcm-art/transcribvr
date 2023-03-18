@@ -35,17 +35,10 @@ jobs:
             tar -xz -C /tmp -f /tmp/docker-$VER.tgz
             mv /tmp/docker/* /usr/bin
       - run:
-         # Builds a docker image to push to Docker Hub
-				 # Tag (-t) pattern is below, where CircleCI 
-				 # to get the Dockerfile from the current directory.
-         # <docker_hub_username/docker-hub-password:version>.
           name: Build Docker image
           command: docker build --platform linux/amd64 -t jcmart/transcribvr-ubuntu-18-04-amd-circleci:0.1 .
 
       - run:
-        # Pushes the Docker image you created to the Docker Hub.
-        # Replace khabdrick/circleci-tutorial:v1 with the 
-				# <docker_hub_username/docker-hub-password:version> you used to build the image above
           name: Push to Docker Hub
           command: |
             docker login -u $DOCKER_HUB_USER_ID -p $DOCKERHUB_PASSWORD
