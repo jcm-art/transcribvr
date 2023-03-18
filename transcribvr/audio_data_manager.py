@@ -53,6 +53,9 @@ class AudioDataManager:
         dict: A dictionary containing file names and metadata.
         """
 
+        #TODO: handle file lists
+        #TODO: handle zip files
+        #TODO: assign_file_names
         #Get current audio file path
         audio_file_path = audio_file_paths
 
@@ -64,14 +67,9 @@ class AudioDataManager:
         audio_format = self.__get_audio_format(audio_file_path)
 
         #Check that audio format is in scope
-        assert(self.__check_audio_format(audio_format))
-
-        #TODO: handle file lists
-        #TODO: handle zip files
-        #TODO: assign_file_names
-        audio_buffer_file = self.__load_audio(audio_file_path, buffer_audio_name, audio_format)
-
-        self.audio_files[buffer_audio_name] = "METADATA PLACEHOLDER"
+        if self.__check_audio_format(audio_format):
+            audio_buffer_file = self.__load_audio(audio_file_path, buffer_audio_name, audio_format)
+            self.audio_files[buffer_audio_name] = "METADATA PLACEHOLDER"
 
         return self.audio_files
     
