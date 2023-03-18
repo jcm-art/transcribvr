@@ -25,7 +25,7 @@ jobs:
             echo "TBD tests"
 
       - run: |
-          docker login -u $DOCKER_HUB_USER_ID -p $DOCKER_HUB_PASSWORD
+          echo "$DOCKER_HUB_PASSWORD" | docker login --username $DOCKER_HUB_USER_ID --password-stdin
           docker run -d --name db company/proprietary-db:1.2.3
 
       # build the application image
