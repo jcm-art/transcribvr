@@ -4,13 +4,73 @@ import torch
 import whisper
 import torchaudio
 
+
+
 class AudioTranscriber:
+    """
+    A class that transcribes audio files using a pre-trained model.
+
+    Attributes:
+        DEVICE (str): The device in use for processing the audio. Default is an empty 
+            string, which will be defined later.
+        INPUT_FILEPATH (str): The path where the audio input files are located.
+        LANGUAGE_DEFAULT (str): The default language to use for the standard performance 
+            model.
+        transcription_dict (dict): A dictionary to store the transcriptions.
+
+    Methods:
+        __init__(high_perf=False):
+            Initializes the AudioTranscriber object with either high performance or 
+            standard performance depending on the input argument.
+
+        transcribe_audio_in_buffer(audio_buffer: dict, job_id: str) -> dict:
+            Transcribes audio data from a given audio buffer and job ID.
+
+        __parse_audio_dict(audio_buffer: dict, job_id: str) -> bool:
+            Parses the audio dictionary from the audio buffer and stores the results in 
+            the transcription dictionary.
+
+        __define_device():
+            Defines the device used for processing audio.
+
+        __load_model() -> bool:
+            Loads the pre-trained model for transcription.
+
+        __load_audio(audio_file: str):
+            Loads the audio file from the given file path and converts it into a format 
+            compatible with the model.
+
+        __make_log_mel_spectrogram(audio):
+            Computes the log mel spectrogram for the audio file.
+
+        __detect_language(mel_audio) -> str:
+            Detects the language of the audio based on the mel spectrogram.
+
+        __decode_audio(mel_audio):
+            Decodes the audio to obtain the text transcription.
+
+        __get_output_text(result) -> str:
+            Gets the output text from the transcription result.
+
+        __log_entry(entry: str):
+            Logs an entry to track the progress of the transcription.
+    """
     DEVICE = ""
     INPUT_FILEPATH = "./audio_input/"
     LANGUAGE_DEFAULT = "N/A for standard performance model"
     transcription_dict = {}
 
     def __init__(self, high_perf=False):
+        """
+        Initializes the AudioTranscriber object.
+
+        Args:
+            high_perf (bool): a flag indicating whether to use high-performance 
+                transcription. Default is False (standard performance).
+
+        Returns:
+            None.
+        """
         self.high_perf = high_perf
         self.__log_entry("Initializing %s AudioTranscriber" % 
                          ("high performance" if self.high_perf else "standard performance"))
@@ -21,11 +81,37 @@ class AudioTranscriber:
         assert(self.__load_model())
 
     def transcribe_audio_in_buffer(self, audio_buffer: dict, job_id: str) -> dict:
+        """
+        Transcribes audio data from a given audio buffer and job ID.
+
+        Args:
+            audio_buffer (dict): A dictionary containing audio data.
+            job_id (str): An identifier for the transcription job.
+
+        Returns:
+            dict: A dictionary containing the transcription and metadata for each audio 
+                file.
+
+        Raises:
+            AssertionError: If there was a problem parsing the audio dictionary.
+        """
         assert(self.__parse_audio_dict(audio_buffer, job_id))
 
         return self.transcription_dict[job_id]
 
     def __parse_audio_dict(self, audio_buffer: dict, job_id: str) -> bool:
+        """
+        Parses the audio dictionary from the audio buffer and stores the results in the 
+        transcription dictionary.
+
+        Args:
+            audio_buffer (dict): A dictionary containing audio data.
+            job_id (str): An identifier for the transcription job.
+
+        Returns:
+            bool: True if the audio dictionary was successfully parsed and stored in the 
+                transcription dictionary.
+        """
         audio_entry={}
         self.__log_entry("Parsing audio dictionary")
         language = self.LANGUAGE_DEFAULT
@@ -51,6 +137,15 @@ class AudioTranscriber:
         return True
     
     def __define_device(self):
+        """
+        Defines the device used for processing audio.
+
+        Args:
+            None.
+
+        Returns:
+            None.
+        """
         if not torch.backends.mps.is_available():
             if not torch.backends.mps.is_built():
                 print("MPS not available because the current PyTorch install was not "
@@ -63,11 +158,31 @@ class AudioTranscriber:
             self.DEVICE = torch.device("mps")
     
     def __load_model(self) -> bool:
+        """
+        Loads the pre-trained model for transcription.
+
+        Args:
+            None.
+
+        Returns:
+            bool: True if the pre-trained model was loaded successfully.
+        """
         self.__log_entry("Loading %s model" % ("high performance" if self.high_perf else "standard performance"))
         self.model = whisper.load_model("base.en")
         return True
     
     def __load_audio(self, audio_file: str):
+        """
+        Loads the audio file from the given file path and converts it into a format 
+        compatible with the model.
+
+        Args:
+            audio_file (str): The name of the audio file.
+
+        Returns:
+            The loaded and formatted audio data.
+
+        """
         audio_buffer_file = audio_file + ".mp3"
         file_path = os.path.join(self.INPUT_FILEPATH, audio_buffer_file)
 
@@ -77,11 +192,29 @@ class AudioTranscriber:
         return audio
     
     def __make_log_mel_spectrogram(self, audio):
+        """
+        Computes the log mel spectrogram for the audio file.
+
+        Args:
+            audio: The audio data.
+
+        Returns:
+            The log mel spectrogram for the audio data.
+        """
         self.__log_entry("Making spectrogram for audio file")
         mel = whisper.log_mel_spectrogram(audio).to(self.model.device)
         return mel
     
     def __detect_language(self, mel_audio) -> str:
+        """
+        Detects the language of the audio based on the mel spectrogram.
+
+        Args:
+            mel_audio: The mel spectrogram for the audio data.
+
+        Returns:
+            str: The detected language.
+        """
         self.__log_entry("Detecting Language for audio file")
         _, probs = self.model.detect_language(mel_audio)
         language_detection = f"Detected language: {max(probs, key=probs.get)}"
