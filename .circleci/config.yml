@@ -11,12 +11,17 @@ jobs:
     resource_class: arm.medium
     steps:
       - checkout #adds files to circle CI
-      - run:
-          name: The First Step
+      - hello_test:
+          name: Testing First Step and Viewing Files
           command: |
             uname -a
             echo "Hello, Arm!"
             ls -al
+      - run_tests:
+          name: Running Tests
+          command: |
+            cd transcribvr
+            python3 -m pytest tests
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
