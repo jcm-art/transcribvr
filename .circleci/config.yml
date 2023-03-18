@@ -23,4 +23,3 @@ workflows:
   say-hello-workflow:
     jobs:
       - build
-      - run
