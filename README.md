@@ -75,6 +75,14 @@ To generate html files for updating documentation, run the following in the docs
 
 Add additional notes to deploy this on a live system
 
+### Docker Image Deployment
+
+To generate updates to published docker images:
+
+    docker login
+    docker build -t jcmart/transcribvr-ubuntu-18-04:<updated tag>
+    docker push jcmart/transcribvr-ubuntu-18-04:<updated tag>
+
 ## Versioning
 
 TBD versioning description

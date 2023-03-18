@@ -9,7 +9,10 @@ jobs:
     # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
-      - image: c0c948a3ef00fedadd344c1824649d00b30e5688140df7c6648488ebc168cb71
+      - image: jcmart/transcribvr-ubuntu-18-04:0.1
+        auth:
+            username: $DOCKER_HUB_USER_ID
+            password: $DOCKERHUB_PASSWORD
     # Add steps to the job
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
