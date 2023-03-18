@@ -33,9 +33,26 @@ jobs:
       # deploy the image
       - run: docker push jcmart/transcribvr-ubuntu-18-04-amd-circleci:0.1
 
+  docker-test:
+    docker:
+      - image: jcmart/transcribvr-ubuntu-18-04-amd-circleci:latest
+        auth:
+          username: $DOCKER_HUB_USER_ID
+          password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
+    steps:
+      - checkout #adds files to circle CI
+
+      - run:
+          name: Testing First Test Step and Viewing Files
+          command: |
+            uname -a
+            echo "Hello, Arm!"
+            ls -al
+
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
   say-hello-workflow:
     jobs:
-      - docker-build
+      #- docker-build
+      - docker-test
