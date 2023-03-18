@@ -7,7 +7,7 @@ version: 2.1
 jobs:
   docker-build:
     machine:
-        image: ubuntu-2204:2022.04.2
+        image: ubuntu-2004:current
     resource_class: arm.medium
     steps:
       - checkout #adds files to circle CI
