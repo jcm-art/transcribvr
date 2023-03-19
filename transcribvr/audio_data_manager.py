@@ -28,7 +28,7 @@ class AudioDataManager:
     """
 
     audio_files = {}
-    allowed_formats = ("mp3, m4a")
+    allowed_formats = ("mp3", "m4a")
     INPUT_FILEPATH = "./audio_input/"
     file_num=0
 

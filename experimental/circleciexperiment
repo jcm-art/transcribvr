@@ -1,0 +1,27 @@
+jobs:
+  say-hello:
+    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
+    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
+    machine:
+      resource_class: arm.medium
+      steps:
+        - run: uname -a
+        - run: echo "Hello, Arm!"
+    # Add steps to the job
+    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+    steps:
+      - checkout
+      - run:
+          name: "Say hello"
+          command: "echo Hello, World!"
+  docker-build:
+    docker:
+        - image: jcmart/transcribvr-ubuntu-18-04:0.1
+          auth:
+              username: $DOCKER_HUB_USER_ID
+              password: $DOCKERHUB_PASSWORD
+    steps:
+      - checkout
+      - run:
+          name: "Say hello"
+          command: "echo Hello, World!"
