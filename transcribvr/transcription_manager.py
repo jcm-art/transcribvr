@@ -1,6 +1,6 @@
-from transcribvr.audio_data_manager import AudioDataManager
-from transcribvr.audio_transcriber import AudioTranscriber
-from transcribvr.output_manager import OutputManager
+from audio_data_manager import AudioDataManager
+from audio_transcriber import AudioTranscriber
+from output_manager import OutputManager
 
 class TranscriptionManager:
     """
@@ -9,6 +9,7 @@ class TranscriptionManager:
     class, formats the output via an output manager, and dispatches the output to the client.
     """
     
+    # TODO - remove this?
     INPUT_FILEPATH = "./audio_input/"
     job_id=0
     job_packages = {}
@@ -84,6 +85,7 @@ class TranscriptionManager:
 
         return output_text
 
+    # TODO - remove this?
     def get_buffer_filepath(self):
         """
         Get the path to the directory where audio buffer files are stored.
@@ -188,4 +190,4 @@ class TranscriptionManager:
             entry (str): A string representing the log entry to be recorded.
 
         """
-        print(entry)
+        print("TranscriptionManager: " + entry)

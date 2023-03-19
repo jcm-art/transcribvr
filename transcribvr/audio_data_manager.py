@@ -5,31 +5,12 @@ import os
 class AudioDataManager:
     """
     A class for managing audio files.
-
-    Attributes:
-    audio_files (dict): A dictionary to store audio file names and their metadata.
-    allowed_formats (tuple): A tuple of allowed audio file formats.
-    INPUT_FILEPATH (str): A string containing the path to the input directory.
-    file_num (int): An integer to keep track of the number of audio files.
-
-    Methods:
-    __init__(self): Initializes AudioDataManager object.
-    process_audio_files(self, audio_file_paths: str, job_id: str) -> dict: Processes the given audio files and returns a dictionary containing file names and metadata.
-    get_audio_file_paths(self, job_id: str) -> list: Returns a list of file paths for the audio files belonging to the given job ID.
-    clear_audio_buffer(self, job_id: str) -> bool: Clears the audio buffer for the given job ID.
-    get_buffer_filepath(self) -> str: Returns the input directory path.
-    __assign_file_prefix(self, job_id: str) -> str: Assigns a prefix to the audio file name based on the job ID and the file number.
-    __check_file_format(self, audio_filename: str) -> bool: Verifies whether the audio file format is allowed.
-    __get_audio_format(self, audio_filename: str) -> str: Extracts the audio file format from the file name.
-    __check_audio_format(self, audio_format: str) -> bool: Verifies whether the audio file format is allowed.
-    __load_audio(self, audio_filename: str, buffer_audio_name: str, audio_format: str): Loads the audio file into the audio buffer.
-    __convert_audio_to_buffer(self, audio_object, buffer_audio_name: str) -> str: Converts the audio file to mp3 format and saves it in the input directory.
-    __log_entry(self, entry: str): Prints the given string to the console.
     """
 
     audio_files = {}
     allowed_formats = ("mp3", "m4a")
     INPUT_FILEPATH = "./audio_input/"
+    BUFFER_FILEPATH = "./queued_audio/"
     file_num=0
 
 
@@ -68,8 +49,14 @@ class AudioDataManager:
 
         #Check that audio format is in scope
         if self.__check_audio_format(audio_format):
-            audio_buffer_file = self.__load_audio(audio_file_path, buffer_audio_name, audio_format)
-            self.audio_files[buffer_audio_name] = "METADATA PLACEHOLDER"
+            audio_buffer_filepath = self.__load_audio(audio_file_path, buffer_audio_name, audio_format)
+            self.audio_files[buffer_audio_name] = {"metadata": 
+                                                    {"original metadata": "METADATA PLACEHOLDER", 
+                                                    "buffer_file_path": audio_buffer_filepath },
+                                                    }
+            
+            #TODO - add buffer filepath to dictionary
+            #self.audio_files[buffer_audio_name] = "METADATA PLACEHOLDER"
 
         return self.audio_files
     
@@ -211,8 +198,14 @@ class AudioDataManager:
 
         audio_buffer_file = ""
         if audio_format == "mp3":
-            os.system('cp %s %s' % (audio_filename,buffer_audio_name))  
-            audio_buffer_file = buffer_audio_name+".mp3"
+            self.__log_entry("Already formatted as an mp3, copying to buffer file")
+            
+            audio_buffer_file = self.INPUT_FILEPATH + buffer_audio_name+".mp3"
+
+            self.__log_entry("Queued file name: " + audio_filename)
+            self.__log_entry("Buffer file name: " + audio_buffer_file)
+
+            os.system('cp %s %s' % (audio_filename, audio_buffer_file))  
         else:
             m4a_audio = AudioSegment.from_file(audio_filename, format=audio_format)
             audio_buffer_file = self.__convert_audio_to_buffer(m4a_audio, buffer_audio_name)
@@ -260,4 +253,4 @@ class AudioDataManager:
         Raises:
             None.
         """
-        print(entry)
+        print("AudioDataManager: " + entry)
