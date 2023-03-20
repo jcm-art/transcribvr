@@ -51,7 +51,7 @@ class TranscriptionManager:
         else:
             return False
 
-    def assign_transcription(self,audio_file_path: str) -> str:
+    def assign_transcription(self,audio_file_paths: list) -> str:
         """
         Assign a transcription task for the specified audio file.
 
@@ -65,7 +65,7 @@ class TranscriptionManager:
         """
         self.__log_entry("Assign transcription task")
         current_job_id = self.__generate_job_id()
-        self.job_packages[current_job_id]= audio_file_path
+        self.job_packages[current_job_id]= audio_file_paths
 
         self.__log_entry("Prepare audio files for " + current_job_id)
 
@@ -99,7 +99,7 @@ class TranscriptionManager:
         """
         return self.INPUT_FILEPATH
 
-    def __prepare_audio(self, audio_files: str, job_id: str) -> dict:
+    def __prepare_audio(self, audio_file_list: list, job_id: str) -> dict:
         """
         Prepare the specified audio files for transcription.
 
@@ -112,7 +112,7 @@ class TranscriptionManager:
 
         """
         self.__log_entry("Prepare audio for job id %s " % job_id)
-        processed_files = self.audioLoader.process_audio_files(audio_files, job_id)
+        processed_files = self.audioLoader.process_audio_files(audio_file_list, job_id)
         self.__log_entry("Processed files returned: \n" + str(processed_files))
         return processed_files
     

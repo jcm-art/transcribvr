@@ -8,7 +8,7 @@ class AudioDataManager:
     """
 
     audio_files = {}
-    allowed_formats = ("mp3", "m4a")
+    allowed_formats = ("mp3", "m4a","ogg","flac","aiff","wav")
     INPUT_FILEPATH = "./audio_input/"
     BUFFER_FILEPATH = "./queued_audio/"
     file_num=0
@@ -22,7 +22,7 @@ class AudioDataManager:
         self.__log_entry("Initializing AudioDataManager")
 
 
-    def process_audio_files(self, audio_file_paths: str, job_id: str) ->dict: 
+    def process_audio_files(self, audio_file_paths: list, job_id: str) ->dict: 
         """
         Processes the given audio files and returns a dictionary containing file names and metadata.
 
@@ -38,25 +38,25 @@ class AudioDataManager:
         #TODO: handle zip files
         #TODO: assign_file_names
         #Get current audio file path
-        audio_file_path = audio_file_paths
+        for item in audio_file_paths:
+            audio_file_path = item
 
-        #Assign prefix for job and audio file
-        buffer_audio_name = self.__assign_file_prefix(job_id)
-    
+            #Assign prefix for job and audio file
+            buffer_audio_name = self.__assign_file_prefix(job_id)
+        
+            #Get audio file format
+            audio_format = self.__get_audio_format(audio_file_path)
 
-        #Get audio file format
-        audio_format = self.__get_audio_format(audio_file_path)
-
-        #Check that audio format is in scope
-        if self.__check_audio_format(audio_format):
-            audio_buffer_filepath = self.__load_audio(audio_file_path, buffer_audio_name, audio_format)
-            self.audio_files[buffer_audio_name] = {"metadata": 
-                                                    {"original metadata": "METADATA PLACEHOLDER", 
-                                                    "buffer_file_path": audio_buffer_filepath },
-                                                    }
-            
-            #TODO - add buffer filepath to dictionary
-            #self.audio_files[buffer_audio_name] = "METADATA PLACEHOLDER"
+            #Check that audio format is in scope
+            if self.__check_audio_format(audio_format):
+                audio_buffer_filepath = self.__load_audio(audio_file_path, buffer_audio_name, audio_format)
+                self.audio_files[buffer_audio_name] = {"metadata": 
+                                                        {"original metadata": "METADATA PLACEHOLDER", 
+                                                        "buffer_file_path": audio_buffer_filepath },
+                                                        }
+                
+                #TODO - add buffer filepath to dictionary
+                #self.audio_files[buffer_audio_name] = "METADATA PLACEHOLDER"
 
         return self.audio_files
     
@@ -116,6 +116,7 @@ class AudioDataManager:
         :rtype: str
         """
         current_filename = job_id + "f" + str(self.file_num)
+        self.file_num+=1
         self.__log_entry("Assigning file name of " + current_filename)
         return current_filename
 
@@ -207,8 +208,9 @@ class AudioDataManager:
 
             os.system('cp %s %s' % (audio_filename, audio_buffer_file))  
         else:
-            m4a_audio = AudioSegment.from_file(audio_filename, format=audio_format)
-            audio_buffer_file = self.__convert_audio_to_buffer(m4a_audio, buffer_audio_name)
+            self.__log_entry(f"Converting audio from {audio_format} to mp3")
+            audio_source_format = AudioSegment.from_file(audio_filename, format=audio_format)
+            audio_buffer_file = self.__convert_audio_to_buffer(audio_source_format, buffer_audio_name)
 
         self.__log_entry("Loaded " + audio_filename)
 

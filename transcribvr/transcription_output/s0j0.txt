@@ -1,5 +1,5 @@
 Transcription for file s0j0f0
 
-Metadata: {'original metadata': {'metadata': {'original metadata': 'METADATA PLACEHOLDER', 'buffer_file_path': 's0j0f0.mp3'}}, 'language': 'N/A for standard performance model'}
+Metadata: {'original metadata': {'metadata': {'original metadata': 'METADATA PLACEHOLDER', 'buffer_file_path': './audio_input/s0j0f0.mp3'}}, 'language': 'N/A for standard performance model'}
 
-Transcript: Hey! More than that. You're my pay booba. Can you speak clearly and describe your love for me? I love my darling booba. He is the best booba for me. He is really sweet and he takes care of me. And he's also really good at being an amazing companion for all the things that I want to do. That's what I talked about last night and he has some favorite thing in my
+Transcript: prologue, the pastor's daughter.
