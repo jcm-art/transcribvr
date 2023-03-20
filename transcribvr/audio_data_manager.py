@@ -49,10 +49,11 @@ class AudioDataManager:
 
             #Check that audio format is in scope
             if self.__check_audio_format(audio_format):
-                audio_buffer_filepath = self.__load_audio(audio_file_path, buffer_audio_name, audio_format)
+                audio_buffer_filepath, duration = self.__load_audio(audio_file_path, buffer_audio_name, audio_format)
                 self.audio_files[buffer_audio_name] = {"metadata": 
                                                         {"original metadata": "METADATA PLACEHOLDER", 
-                                                        "buffer_file_path": audio_buffer_filepath },
+                                                        "buffer_file_path": audio_buffer_filepath,
+                                                         "duration_seconds": duration },
                                                         }
                 
                 #TODO - add buffer filepath to dictionary
@@ -198,7 +199,7 @@ class AudioDataManager:
         """
 
         audio_buffer_file = ""
-        if audio_format == "mp3":
+        if audio_format == "mp3" and False:
             self.__log_entry("Already formatted as an mp3, copying to buffer file")
             
             audio_buffer_file = self.INPUT_FILEPATH + buffer_audio_name+".mp3"
@@ -210,11 +211,12 @@ class AudioDataManager:
         else:
             self.__log_entry(f"Converting audio from {audio_format} to mp3")
             audio_source_format = AudioSegment.from_file(audio_filename, format=audio_format)
+            duration = audio_source_format.duration_seconds
             audio_buffer_file = self.__convert_audio_to_buffer(audio_source_format, buffer_audio_name)
 
         self.__log_entry("Loaded " + audio_filename)
 
-        return audio_buffer_file
+        return audio_buffer_file, duration
     
     def __convert_audio_to_buffer(self, audio_object, buffer_audio_name: str) -> str:
         """

@@ -76,12 +76,18 @@ class AudioTranscriber:
             metadata = audio_buffer[audio_file]
             self.__log_entry("Processing key %s with metadata %s" % (audio_file, metadata))
 
-            audio = self.__load_audio(audio_file)
-            mel_audio = self.__make_log_mel_spectrogram(audio)
-            #TODO: add language support for higher perf models
-            #language = self.__detect_language(mel_audio)
-            result = self.__decode_audio(mel_audio)
-            output_text = self.__get_ouput_text(result)
+            if metadata['metadata']["duration_seconds"]>30:
+                audio_buffer_file = audio_file + ".mp3"
+                file_path = os.path.join(self.INPUT_FILEPATH, audio_buffer_file)
+                result = self.model.transcribe(file_path)
+                output_text=result["text"]
+            else:
+                audio = self.__load_audio(audio_file)
+                mel_audio = self.__make_log_mel_spectrogram(audio)
+                #TODO: add language support for higher perf models
+                #language = self.__detect_language(mel_audio)
+                result = self.__decode_audio(mel_audio)
+                output_text = self.__get_ouput_text(result)
 
 
             audio_entry[audio_file] = {"metadata": 
@@ -143,6 +149,7 @@ class AudioTranscriber:
         file_path = os.path.join(self.INPUT_FILEPATH, audio_buffer_file)
 
         audio = whisper.load_audio(file_path)
+        
         audio = whisper.pad_or_trim(audio)
 
         return audio
