@@ -108,4 +108,4 @@ my_librianalyzer = LibriSpeechTestData()
 
 my_librianalyzer.execute_dataset_procurement()
 time.sleep(2)
-my_librianalyzer.clear_dataset()
+#my_librianalyzer.clear_dataset()
