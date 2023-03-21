@@ -11,6 +11,7 @@ class AudioDataManager:
     allowed_formats = ("mp3", "m4a","ogg","flac","aiff","wav")
     INPUT_FILEPATH = "./audio_input/"
     BUFFER_FILEPATH = "./queued_audio/"
+    AUDIO_FAILED = "Unabled to process audio"
     file_num=0
 
 
@@ -22,7 +23,7 @@ class AudioDataManager:
         self.__log_entry("Initializing AudioDataManager")
 
 
-    def process_audio_files(self, audio_file_paths: list, job_id: str) ->dict: 
+    def process_audio_files(self, audio_filepaths: list, job_id: str) -> dict: 
         """
         Processes the given audio files and returns a dictionary containing file names and metadata.
 
@@ -34,11 +35,10 @@ class AudioDataManager:
         dict: A dictionary containing file names and metadata.
         """
 
-        #TODO: handle file lists
-        #TODO: handle zip files
+        adm_package = {}
         #TODO: assign_file_names
         #Get current audio file path
-        for item in audio_file_paths:
+        for item in audio_filepaths:
             audio_file_path = item
 
             #Assign prefix for job and audio file
@@ -46,25 +46,26 @@ class AudioDataManager:
         
             #Get audio file format
             audio_format = self.__get_audio_format(audio_file_path)
+            adm_package[buffer_audio_name] = {}
 
             #Check that audio format is in scope
+            # TODO - error handling for incorrect files
             if self.__check_audio_format(audio_format):
+                # Load audio files
                 audio_buffer_filepath, duration = self.__load_audio(audio_file_path, buffer_audio_name, audio_format)
-                self.audio_files[buffer_audio_name] = {"metadata": 
-                                                        {"original metadata": "METADATA PLACEHOLDER", 
-                                                        "buffer_file_path": audio_buffer_filepath,
-                                                         "duration_seconds": duration },
-                                                        }
-                
-                #TODO - add buffer filepath to dictionary
-                #self.audio_files[buffer_audio_name] = "METADATA PLACEHOLDER"
 
-        return self.audio_files
+                # Build package for return
+                adm_package[buffer_audio_name]['audio_input_filepath'] = audio_buffer_filepath
+                adm_package[buffer_audio_name]['duration_seconds'] = duration
+                adm_package[buffer_audio_name]['TBD_ADM_METADATA'] = -1
+
+        return adm_package
     
     #def process_audio_files(audio_files: dict, job_id: str) -> dict: 
     #    return audio_files
     
     #TODO - test case for get audio file paths
+    #TODO - remove
     def get_audio_file_paths(self, job_id: str) -> list:
         """
         Returns a list of file paths for the audio files belonging to the given job ID.
@@ -199,6 +200,7 @@ class AudioDataManager:
         """
 
         audio_buffer_file = ""
+        #TODO - remove MP3 case
         if audio_format == "mp3" and False:
             self.__log_entry("Already formatted as an mp3, copying to buffer file")
             

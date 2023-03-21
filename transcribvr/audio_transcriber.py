@@ -14,7 +14,6 @@ class AudioTranscriber:
     DEVICE = ""
     INPUT_FILEPATH = "./audio_input/"
     LANGUAGE_DEFAULT = "N/A for standard performance model"
-    transcription_dict = {}
 
     def __init__(self, high_perf=False):
         """
@@ -36,7 +35,7 @@ class AudioTranscriber:
 
         assert(self.__load_model())
 
-    def transcribe_audio_in_buffer(self, audio_input_files: list, duration_times: list, job_id: str) -> dict:
+    def transcribe_audio_in_buffer(self, preprocessed_audio: dict, job_id: str) -> dict:
         """
         Transcribes audio data from a given audio buffer and job ID.
 
@@ -52,11 +51,11 @@ class AudioTranscriber:
             AssertionError: If there was a problem parsing the audio dictionary.
         """
         self.__log_entry(f"Receiving queued audio file list from {job_id}")
-        transcript, at_metadata = self.__parse_audio_list(audio_input_files, duration_times, job_id)
+        tm_package = self.__parse_audio_list(preprocessed_audio, job_id)
 
-        return transcript, at_metadata
+        return tm_package
 
-    def __parse_audio_list(self, audio_input_files: list, duration_times: list, job_id: str):
+    def __parse_audio_list(self, preprocessed_audio: dict, job_id: str):
         """
         Parses the audio dictionary from the audio buffer and stores the results in the 
         transcription dictionary.
@@ -70,18 +69,20 @@ class AudioTranscriber:
                 transcription dictionary.
         """
         self.__log_entry(f"Parsing audio dictionary for {job_id}")
-        adm_metadata = {}
+        transcription_package = {}
 
         # Set language for audio file
         language = self.LANGUAGE_DEFAULT
     
-        for i in range(len(audio_input_files)):
-            audio_file = audio_buffer_file[i]
+        for key in preprocessed_audio:
+            # Get items from dictionary
+            audio_file = preprocessed_audio[key]['audio_input_filepath']
+            duration = preprocessed_audio[key]['duration_seconds']
+
             self.__log_entry(f"Processing {audio_file} with metadata")
 
-            if duration_times[i]>30:
-                audio_buffer_file = audio_file + ".mp3"
-                file_path = os.path.join(self.INPUT_FILEPATH, audio_buffer_file)
+            if duration > 30:
+                file_path = os.path.join(self.INPUT_FILEPATH, audio_file)
                 result = self.model.transcribe(file_path)
                 output_text=result["text"]
             else:
@@ -93,10 +94,11 @@ class AudioTranscriber:
                 output_text = self.__get_ouput_text(result)
 
             # Add metadata to dictionary for return
-            adm_metadata["language"] = language
-            adm_metadata["TBD_OTHER_METADATA"] = -1
+            transcription_package[key] = {"transcription": output_text,
+                                          "language": language,
+                                          "TBD_OTHER_METADATA": -1}
        
-        return output_text, adm_metadata
+        return transcription_package
     
     def __define_device(self):
         """
@@ -145,7 +147,7 @@ class AudioTranscriber:
             The loaded and formatted audio data.
 
         """
-        audio_buffer_file = audio_file + ".mp3"
+        audio_buffer_file = audio_file
         file_path = os.path.join(self.INPUT_FILEPATH, audio_buffer_file)
 
         audio = whisper.load_audio(file_path)

@@ -12,6 +12,7 @@ class TranscriptionManager:
     # TODO - remove this?
     INPUT_FILEPATH = "./audio_input/"
     job_packages = {}
+    # TODO - move metadata tags into static global constants
 
     def __init__(self, session_num):
         """
@@ -77,7 +78,7 @@ class TranscriptionManager:
 
         # Dispatch task - currently single threaded, potentially multithreaded in the future
         # Replace global package with output dictionary
-        self.job_packages[current_task_id_str]= self.__dispatch_task(audio_file_paths, current_task_id_str)
+        return self.__dispatch_task(audio_file_paths, current_task_id_str)
         
 
     # TODO - remove this?
@@ -103,38 +104,36 @@ class TranscriptionManager:
         # Start building job filestructure
         current_package["task_id"] = current_task_id_str
         current_package["queued_filepaths"] = audio_file_paths
-        self.__log_entry(f"""Package initiated for {current_task_id_str}: \n
-                            {current_package[current_task_id_str]}""")
+        self.__log_entry(f"Package initiated for {current_task_id_str}: \n {current_package}")
 
         # Audio Data manager preprocessing of audio files
         # Add filepaths for conditioned audio files in audio_input to current_package
-        audio_input_files, adm_metadata = self.__prepare_audio(
+        adm_package = self.__prepare_audio(
             current_package["queued_filepaths"], 
             current_task_id_str)
-        current_package["audio_input_filepaths"] = audio_input_files
-        current_package["audio_data_manager_metadata"] = adm_metadata
-        self.__log_entry(f"""Package post AudioDataManager for {current_task_id_str}: \n 
-                            {current_package[current_task_id_str]}""")
+        current_package["preprocessed_audio"] = adm_package
+        self.__log_entry(f"Package post AudioDataManager for {current_task_id_str}: \n {current_package}")
 
 
         # Transcription of audio files in buffer
-        transcript, tm_metadata = self.__transcribe_audio(
-            current_package["audio_input_filepaths"],
+        tm_package = self.__transcribe_audio(
+            current_package["preprocessed_audio"],
             current_task_id_str)
-        current_package["audio_transcript"] = transcript
-        current_package["transcription_metadata"] = tm_metadata
-        self.__log_entry(f"""Package post AudioDataManager for {current_task_id_str}: \n 
-                            {current_package[current_task_id_str]}""")
+        current_package["transcription_output"] = tm_package
+        self.__log_entry(f"Package post TranscriptioManager for {current_task_id_str}: \n {current_package}")
 
         # Format output text from transcription distionary
-        output_text = self.__generate_output(current_task_id_str)
-        # TODO - log in submethod
-        self.__log_entry("Final Output Text: \n " + output_text + " finished.")
+        transcription_output, ouput_file_location = self.__generate_output(current_package, current_task_id_str)
+
+        # Current package to global package
+        self.__add_package_to_global(current_package, current_task_id_str)
 
         # Dispatch output
-        # TODO - return file name for command line application
+        self.__dispatch_output(transcription_output, current_task_id_str)
 
-        return output_text
+        self.__log_entry("Finished with transcription task")
+
+        return ouput_file_location
 
     def __prepare_audio(self, audio_file_list: list, task_id_str: str) -> dict:
         """
@@ -150,10 +149,10 @@ class TranscriptionManager:
         """
         self.__log_entry(f"Prepare audio files for {task_id_str}")
         # Get audio input buffer files and initial metadata
-        processed_files, adm_metadata = self.audioLoader.process_audio_files(audio_file_list, task_id_str)
-        return processed_files, adm_metadata
+        adm_package = self.audioLoader.process_audio_files(audio_file_list, task_id_str)
+        return adm_package
     
-    def __transcribe_audio(self, audio_input_file_list: list, duration_list: list, task_id_str: str) -> dict:
+    def __transcribe_audio(self, preprocessed_audio: dict, task_id_str: str) -> dict:
         """
         Transcribe the audio contained within the specified transcription package.
 
@@ -168,12 +167,11 @@ class TranscriptionManager:
 
         """
         self.__log_entry(f"Transcribe audio files for {task_id_str}")
-        transcription_output, tm_metadata = self.audioTranscriber.transcribe_audio_in_buffer(
-            audio_input_file_list,duration_list, task_id_str)
-        
-        return transcription_output, tm_metadata
+        transcription_package = self.audioTranscriber.transcribe_audio_in_buffer(
+            preprocessed_audio, task_id_str)
+        return transcription_package
     
-    def __generate_output(self, task_id_str) -> str:
+    def __generate_output(self, current_package: dict, task_id_str: str ) -> str:
         """
         Generate the transcription output text for the specified job.
 
@@ -186,17 +184,20 @@ class TranscriptionManager:
 
         """
         self.__log_entry("Generate transcription output")
-        output_text = self.outputManager.generate_ouput_text(self.job_packages[task_id_str], task_id_str)
-        return output_text
+        output_text, output_file_location = self.outputManager.generate_ouput_text(current_package, task_id_str)
+        return output_text, output_file_location
     
+    def __add_package_to_global(self,current_package, task_id_str):
+        self.job_packages[task_id_str]= current_package
+
+
     def __get_job_id_str(self, session_num, job_num) -> str:
         '''Method returns a string with the session number and job number for JSPON structure'''
         return f"s{session_num}j{job_num}"
 
-    def __dispatch_output(self, task_id_str) -> bool:
+    def __dispatch_output(self, transcription_output: str, current_task_id_str: str) -> bool:
         self.__log_entry("Dispatch transcription output")
-        #TODO - implement output dispatch
-        return False
+        self.__log_entry(f"Final output text is: \n {transcription_output}")
 
     def __log_entry(self, entry: str):
         """

@@ -21,7 +21,7 @@ class OutputManager:
         """
         self.__log_entry("Initializing OutputManager")
 
-    def generate_ouput_text(self,transcription_dict: dict, current_job_id: str) -> str:
+    def generate_ouput_text(self, job_package: dict, current_job_id: str) -> str:
         """
         Generates the output text for a given transcription dictionary and job ID.
 
@@ -33,18 +33,33 @@ class OutputManager:
             str: The output text generated from the transcription dictionary.
 
         """
-        self.__log_entry("Generating output text")
+        self.__log_entry(f"Generating output for {current_job_id}\n {job_package}")
 
-        output_text=""
-        for transcript in transcription_dict:
-            self.__log_entry("Generating output for " + str(transcript))
-            self.__log_entry("Generating output for " + str(transcription_dict[transcript]))
-            output_text+="Transcription for file " + transcript + "\n\n"
-            output_text+="Metadata: " + str(transcription_dict[transcript]["metadata"])+ "\n\n"
-            output_text+="Transcript: " + str(transcription_dict[transcript]["transcription"])+ "\n"
+        output_text=f"Transcript for transcribvr task {current_job_id}.\n"
+        
+        preprocessed_dictionary = job_package['preprocessed_audio']
+        transcript_dictionary = job_package['transcription_output']
+        #self.__log_entry(preprocessed_dictionary)
+        #self.__log_entry(transcript_dictionary)
 
-        assert(self.__save_output_file(output_text, current_job_id))
-        return output_text
+
+        for item in transcript_dictionary.keys():
+            # Retreived preprocessed metadata
+            preprocessed_item = preprocessed_dictionary[item]
+            transcript_item = transcript_dictionary[item]
+
+            # Unpack metadata
+            duration = preprocessed_item['duration_seconds']
+            language = transcript_item['language']
+            transcript = transcript_item['transcription']
+            
+            output_text+=f"\t Transcription for file {item} \n"
+            output_text+=f"\t\t Duration: {duration} \n"
+            output_text+=f"\t\t Language: {language} \n"
+            output_text+=f"\t\t Transcript: {transcript} \n"
+
+        ouput_file_location = self.__save_output_file(output_text, current_job_id)
+        return output_text, ouput_file_location
     
     def set_custom_filepath(self,custom_output_filepath) -> bool:
         """
@@ -76,7 +91,7 @@ class OutputManager:
         output_file = open(output_filename, "w")
         output_file.write(output_text)
         output_file.close()
-        return True
+        return output_filename
 
     def __log_entry(self, entry: str):
         """

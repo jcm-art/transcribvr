@@ -42,7 +42,8 @@ class TranscribvrServer:
 
         # Assign transcription task to transcription managaer
         if self.tm.check_if_ready_for_transcription():
-            self.tm.assign_transcription(queued_request, self.job_id)
+            output_file = self.tm.assign_transcription(queued_request, self.job_id)
+            self.__log_entry(f"The location of your output file is: {output_file}")
         else:
             self.__log_entry("Transcription manager is not ready, try again")
 
