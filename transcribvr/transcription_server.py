@@ -20,8 +20,16 @@ class TranscribvrServer:
 
             """
             self.__log_entry("Initializing TranscribvrServer")
+            
+            # Get absolute path to queued audio buffer to send files to
             self.__get_queued_buffer_filepath()
-            self.tm = TranscriptionManager()
+
+            # Define session and job ID
+            self.session_id=self.__generate_session_id()
+            self.job_id = 0
+
+            # Instantiate transcription manager for use in jobs
+            self.tm = TranscriptionManager(self.session_id)
 
     def assign_transcription_request(self, request_list):
         # Acknowledge receipt and print list of times to transcribe
@@ -34,7 +42,7 @@ class TranscribvrServer:
 
         # Assign transcription task to transcription managaer
         if self.tm.check_if_ready_for_transcription():
-            self.tm.assign_transcription(queued_request)
+            self.tm.assign_transcription(queued_request, self.job_id)
         else:
             self.__log_entry("Transcription manager is not ready, try again")
 
@@ -73,6 +81,34 @@ class TranscribvrServer:
             for file in transcription_files:
                 zip_list.append(self.zip_audio_prefix + file)
         return zip_list
+
+    def __generate_session_id(self) -> int:
+        """
+        Define and return a unique identifier for the current session.
+
+        Returns:
+            int: An integer representing the unique identifier for the current session.
+
+        """
+        self.__log_entry("Generate session id")
+
+        #TODO - use incrementing session loaded on start
+        session_id = 0
+        return session_id
+    
+    def __generate_job_id(self) -> str:
+        """
+        Generate and return a unique identifier for the current transcription job.
+
+        Returns:
+            str: A string representing the unique identifier for the current transcription job.
+
+        """
+        current_job_id = "s" + str(self.session_id) + "j" + str(self.job_id)
+        self.job_id+=1
+
+        self.__log_entry("Generated job id: %s" % current_job_id)
+        return current_job_id
 
     def __log_entry(self, entry: str):
         """

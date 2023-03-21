@@ -11,10 +11,9 @@ class TranscriptionManager:
     
     # TODO - remove this?
     INPUT_FILEPATH = "./audio_input/"
-    job_id=0
     job_packages = {}
 
-    def __init__(self):
+    def __init__(self, session_num):
         """
         Constructor for the TranscriptionManager class. Initializes object attributes and 
         sets up a new transcription session.
@@ -27,12 +26,16 @@ class TranscriptionManager:
 
         """
         self.__log_entry("Initializing TranscriptionManager")
-        self.session_id=self.__define_session_id()
+        # Assign session number to TM
+        self.session_num = session_num
+
+        # Load other motdules needed for transcription
         self.audioLoader = AudioDataManager()
         self.audioTranscriber = AudioTranscriber()
         self.outputManager = OutputManager()
 
-        self.__log_entry("Session %s ready for transcription task" % self.session_id)
+        #Log ready to start
+        self.__log_entry("Session %s ready for transcription task" % self.session_num)
 
     def check_if_ready_for_transcription(self):
         """
@@ -51,7 +54,9 @@ class TranscriptionManager:
         else:
             return False
 
-    def assign_transcription(self,audio_file_paths: list) -> str:
+    # TODO - break into dispatch method to enable future multithreaded expansion
+    # TODO - have transcription manager build dict structure
+    def assign_transcription(self,audio_file_paths: list, job_num: int) -> str:
         """
         Assign a transcription task for the specified audio file.
 
@@ -64,24 +69,41 @@ class TranscriptionManager:
 
         """
         self.__log_entry("Assign transcription task")
-        current_job_id = self.__generate_job_id()
-        self.job_packages[current_job_id]= audio_file_paths
+        
+        # Get identifier 
+        current_task_id_str = self.__get_job_id_str(self.session_num, job_num)
 
-        self.__log_entry("Prepare audio files for " + current_job_id)
+        # Start building job filestructure
+        # TODO - Update dictionary in sub method to clean up
+        self.job_packages[current_task_id_str]= audio_file_paths
 
-        self.__log_entry("Dictionary (to data manager): \n " + str(self.job_packages[current_job_id]))
-
-        self.job_packages[current_job_id] = self.__prepare_audio(self.job_packages[current_job_id], current_job_id)
-
+        # Audio Data manager preprocessing of audio files
+        # TODO - log in submethod
+        self.__log_entry(f"Prepare audio files for {current_task_id_str}")
+        self.__log_entry("Dictionary (to data manager): \n " + str(self.job_packages[current_task_id_str]))
+        # Replace audio file list in dictionary with metadata and locations of files in buffer
+        # TODO - Update dictionary in sub method to clean up
+        self.job_packages[current_task_id_str] = self.__prepare_audio(
+            self.job_packages[current_task_id_str], 
+            current_task_id_str)
+        # TODO - log in submethod
         self.__log_entry("Dictionary (from data manager): \n " + str(self.job_packages))
 
-        self.job_packages[current_job_id] = self.__transcribe_audio(self.job_packages[current_job_id],current_job_id)
-
+        # Transcription of audio files in buffer
+        # TODO - Update dictionary in sub method to clean up
+        self.job_packages[current_task_id_str] = self.__transcribe_audio(
+            self.job_packages[current_task_id_str],
+            current_task_id_str)
+        # TODO - log in submethod
         self.__log_entry("Dictionary (from transcriber): \n " + str(self.job_packages))
 
-        output_text = self.__generate_output(current_job_id)
-
+        # Format output text from transcription distionary
+        output_text = self.__generate_output(current_task_id_str)
+        # TODO - log in submethod
         self.__log_entry("Final Output Text: \n " + output_text + " finished.")
+
+        # Dispatch output
+        # TODO - return file name for command line application
 
         return output_text
 
@@ -99,7 +121,7 @@ class TranscriptionManager:
         """
         return self.INPUT_FILEPATH
 
-    def __prepare_audio(self, audio_file_list: list, job_id: str) -> dict:
+    def __prepare_audio(self, audio_file_list: list, task_id_str: str) -> dict:
         """
         Prepare the specified audio files for transcription.
 
@@ -111,12 +133,12 @@ class TranscriptionManager:
             dict: A dictionary containing the processed audio files, ready for transcription.
 
         """
-        self.__log_entry("Prepare audio for job id %s " % job_id)
-        processed_files = self.audioLoader.process_audio_files(audio_file_list, job_id)
+        self.__log_entry("Prepare audio for job id %s " % task_id_str)
+        processed_files = self.audioLoader.process_audio_files(audio_file_list, task_id_str)
         self.__log_entry("Processed files returned: \n" + str(processed_files))
         return processed_files
     
-    def __transcribe_audio(self, transcription_package: dict, current_job_id: str) -> dict:
+    def __transcribe_audio(self, transcription_package: dict, task_id_str: str) -> dict:
         """
         Transcribe the audio contained within the specified transcription package.
 
@@ -130,13 +152,13 @@ class TranscriptionManager:
             dict: A dictionary containing the transcribed text output for the current transcription job.
 
         """
-        transcription_output = self.audioTranscriber.transcribe_audio_in_buffer(transcription_package, current_job_id)
-        self.__log_entry("Transcribed audio for job %s to output: " % current_job_id)
+        transcription_output = self.audioTranscriber.transcribe_audio_in_buffer(transcription_package, task_id_str)
+        self.__log_entry("Transcribed audio for job %s to output: " % task_id_str)
         self.__log_entry(str(transcription_output))
         
         return transcription_output
     
-    def __generate_output(self, current_job_id) -> str:
+    def __generate_output(self, task_id_str) -> str:
         """
         Generate the transcription output text for the specified job.
 
@@ -149,38 +171,17 @@ class TranscriptionManager:
 
         """
         self.__log_entry("Generate transcription output")
-        output_text = self.outputManager.generate_ouput_text(self.job_packages[current_job_id], current_job_id)
+        output_text = self.outputManager.generate_ouput_text(self.job_packages[task_id_str], task_id_str)
         return output_text
     
-    def __dispatch_output(self) -> bool:
+    def __get_job_id_str(self, session_num, job_num) -> str:
+        '''Method returns a string with the session number and job number for JSPON structure'''
+        return f"s{session_num}j{job_num}"
+
+    def __dispatch_output(self, task_id_str) -> bool:
         self.__log_entry("Dispatch transcription output")
+        #TODO - implement output dispatch
         return False
-    
-    def __define_session_id(self) -> int:
-        """
-        Define and return a unique identifier for the current session.
-
-        Returns:
-            int: An integer representing the unique identifier for the current session.
-
-        """
-        self.__log_entry("Generate session id")
-        session_id = 0
-        return session_id
-    
-    def __generate_job_id(self) -> str:
-        """
-        Generate and return a unique identifier for the current transcription job.
-
-        Returns:
-            str: A string representing the unique identifier for the current transcription job.
-
-        """
-        current_job_id = "s" + str(self.session_id) + "j" + str(self.job_id)
-        self.job_id+=1
-
-        self.__log_entry("Generated job id: %s" % current_job_id)
-        return current_job_id
 
     def __log_entry(self, entry: str):
         """
