@@ -36,7 +36,7 @@ class AudioTranscriber:
 
         assert(self.__load_model())
 
-    def transcribe_audio_in_buffer(self, audio_buffer: dict, job_id: str) -> dict:
+    def transcribe_audio_in_buffer(self, audio_input_files: list, duration_times: list, job_id: str) -> dict:
         """
         Transcribes audio data from a given audio buffer and job ID.
 
@@ -51,11 +51,12 @@ class AudioTranscriber:
         Raises:
             AssertionError: If there was a problem parsing the audio dictionary.
         """
-        assert(self.__parse_audio_dict(audio_buffer, job_id))
+        self.__log_entry(f"Receiving queued audio file list from {job_id}")
+        transcript, at_metadata = self.__parse_audio_list(audio_input_files, duration_times, job_id)
 
-        return self.transcription_dict[job_id]
+        return transcript, at_metadata
 
-    def __parse_audio_dict(self, audio_buffer: dict, job_id: str) -> bool:
+    def __parse_audio_list(self, audio_input_files: list, duration_times: list, job_id: str):
         """
         Parses the audio dictionary from the audio buffer and stores the results in the 
         transcription dictionary.
@@ -68,15 +69,17 @@ class AudioTranscriber:
             bool: True if the audio dictionary was successfully parsed and stored in the 
                 transcription dictionary.
         """
-        audio_entry={}
-        self.__log_entry("Parsing audio dictionary")
+        self.__log_entry(f"Parsing audio dictionary for {job_id}")
+        adm_metadata = {}
+
+        # Set language for audio file
         language = self.LANGUAGE_DEFAULT
     
-        for audio_file in audio_buffer:
-            metadata = audio_buffer[audio_file]
-            self.__log_entry("Processing key %s with metadata %s" % (audio_file, metadata))
+        for i in range(len(audio_input_files)):
+            audio_file = audio_buffer_file[i]
+            self.__log_entry(f"Processing {audio_file} with metadata")
 
-            if metadata['metadata']["duration_seconds"]>30:
+            if duration_times[i]>30:
                 audio_buffer_file = audio_file + ".mp3"
                 file_path = os.path.join(self.INPUT_FILEPATH, audio_buffer_file)
                 result = self.model.transcribe(file_path)
@@ -89,14 +92,11 @@ class AudioTranscriber:
                 result = self.__decode_audio(mel_audio)
                 output_text = self.__get_ouput_text(result)
 
-
-            audio_entry[audio_file] = {"metadata": 
-                                            {"original metadata": metadata, 
-                                             "language": language },
-                                       "transcription": output_text}
-            self.transcription_dict[job_id] = audio_entry
+            # Add metadata to dictionary for return
+            adm_metadata["language"] = language
+            adm_metadata["TBD_OTHER_METADATA"] = -1
        
-        return True
+        return output_text, adm_metadata
     
     def __define_device(self):
         """
